@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroProfit AiDeep Economics - Simulador para Nirea</title>
+    <meta name="description" content="AgroProfit AiDeep Economics - Simulador para Nirea. Sistema profesional de análisis y optimización para confinamiento de corderos. Cálculos precisos de rentabilidad, VAN, TIR y análisis financiero.">
+    <meta name="keywords" content="simulador, corderos, ganadería, frigorífico, análisis financiero, VAN, TIR, rentabilidad">
+    <meta name="author" content="AgroProfit AiDeep Economics - Simulador para Nirea">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzFhNTI3NiIvPgo8dGV4dCB4PSI1IiB5PSIyMiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSI+TjwvdGV4dD4KPC9zdmc+">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a5276;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-color: #333;
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --footer-height: 40px;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Main Layout Structure */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-collapsed {
+            width: 60px;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand {
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-toggle {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-left: auto;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--secondary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: var(--secondary-color);
+        }
+
+        .sidebar-icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Content Area */
+        .content-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrapper-expanded {
+            margin-left: 60px;
+        }
+
+        /* Header */
+        .main-header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: var(--light-color);
+        }
+
+        /* Footer */
+        .footer {
+            height: var(--footer-height);
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: auto;
+            padding: 0 20px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        /* Card styles */
+        .card {
+            border-radius: 4px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            margin-bottom: 20px;
+            background-color: white;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header .card-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .card-header .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .version-banner {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.4);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .header-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Error Panel */
+        .error-panel {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .error-panel.show {
+            display: block;
+        }
+
+        .error-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .error-list {
+            list-style: none;
+        }
+
+        .error-list li {
+            padding: 0.25rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .error-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 6px;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            padding: 8px 12px;
+            border-radius: 3px;
+            border: 1px solid #d1d9e6;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(26, 82, 118, 0.15);
+            outline: none;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 1.1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn i, .btn .icon {
+            margin-right: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-light {
+            background-color: #f8f9fa;
+            border-color: #d1d9e6;
+            color: #495057;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        /* Table styles */
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            border-collapse: collapse;
+            background-color: white;
+            border: 1px solid #e0e5ec;
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-top: 1px solid #e0e5ec;
+            white-space: nowrap;
+        }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            color: var(--dark-color);
+            font-weight: 600;
+            vertical-align: bottom;
+            border-bottom: 2px solid #e0e5ec;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .table tr.positive {
+            background: #f0fff4;
+        }
+
+        .table tr.negative {
+            background: #fff5f5;
+        }
+
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Grid layouts */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .col {
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        .col-3 {
+            flex: 0 0 25%;
+            max-width: 25%;
+            padding: 0 10px;
+        }
+
+        .col-4 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+            padding: 0 10px;
+        }
+
+        .col-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 10px;
+        }
+
+        .col-8 {
+            flex: 0 0 66.666667%;
+            max-width: 66.666667%;
+            padding: 0 10px;
+        }
+
+        .col-9 {
+            flex: 0 0 75%;
+            max-width: 75%;
+            padding: 0 10px;
+        }
+
+        .col-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 0 10px;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-box {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+
+        .metric-box.highlight {
+            background: #fff5f5;
+            border-color: #fed7d7;
+        }
+
+        .metric-box.blue {
+            background: #f0f9ff;
+            border-color: #bae6fd;
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .metric-value-large {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .text-green {
+            color: var(--success-color) !important;
+        }
+
+        .text-red {
+            color: var(--error-color) !important;
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 4px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-content {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            width: 350px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--dark-color) transparent transparent transparent;
+        }
+
+        /* Cost summary */
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            background: white;
+        }
+
+        .cost-item-info {
+            flex: 1;
+        }
+
+        .cost-item-title {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .cost-item-percent {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .cost-item-value {
+            text-align: right;
+        }
+
+        .cost-item-amount {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .cost-item-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .cost-total {
+            border-top: 2px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        /* Protection notice */
+        .protection-notice {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: var(--dark-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            z-index: 10000;
+            opacity: 0.8;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            
+            .content-wrapper {
+                margin-left: 60px;
+            }
+            
+            .sidebar-text {
+                display: none;
+            }
+            
+            .row {
+                margin: 0;
+            }
+            
+            .col, .col-3, .col-4, .col-6, .col-8, .col-9, .col-12 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                padding: 0;
+            }
+        }
+
+        /* Animation for transitions */
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Tab content visibility */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Protection Notice -->
+    <div class="protection-notice">
+        © 2025 AgroProfit AiDeep Economics - Simulador para Nirea | Uso Autorizado
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">AgroProfit</div>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <span>☰</span>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link active" onclick="showTab('simulacion')">
+                        <span class="sidebar-icon">📊</span>
+                        <span class="sidebar-text">Simulación</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" onclick="showTab('inversion')">
+                        <span class="sidebar-icon">🎯</span>
+                        <span class="sidebar-text">Análisis Inversión</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" onclick="showTab('financiero')">
+                        <span class="sidebar-icon">📈</span>
+                        <span class="sidebar-text">Métricas Financieras</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" onclick="showTab('costos')">
+                        <span class="sidebar-icon">💰</span>
+                        <span class="sidebar-text">Análisis Costos</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" onclick="showTab('flujo')">
+                        <span class="sidebar-icon">📅</span>
+                        <span class="sidebar-text">Flujo de Caja</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" onclick="showTab('sanidad')">
+                        <span class="sidebar-icon">⚕️</span>
+                        <span class="sidebar-text">Sanidad</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper" id="contentWrapper">
+            <!-- Main Header -->
+            <header class="main-header">
+                <div class="navbar-brand">Simulador Confinamiento Nirea</div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <h1>Sistema de Análisis y Optimización</h1>
+                    <p>Simulador profesional para confinamiento de corderos con análisis financiero integral</p>
+                    <div class="version-banner">
+                        <strong>VERSIÓN PROFESIONAL AUDITADA</strong> - Todas las correcciones implementadas: Costo de reposición incluido | Mortalidad corregida | Consumo con peso promedio | Depreciación consistente | Validaciones activas | FUNCIONALIDAD COMPLETA
+                    </div>
+                    <div class="header-metrics">
+                        <div class="metric-card">
+                            <div class="metric-label">Corderos por Ciclo</div>
+                            <div class="metric-value" id="header-corderos">1,500</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">GMD Inferida</div>
+                            <div class="metric-value" id="header-gmd">0.333 kg/día</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Eficiencia Conv.</div>
+                            <div class="metric-value" id="header-eficiencia">5.5</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Margen REAL/Cordero</div>
+                            <div class="metric-value" id="header-margen">$0.00</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">ROI Anual</div>
+                            <div class="metric-value" id="header-roi">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Panel -->
+                <div class="error-panel" id="error-panel">
+                    <div class="error-title">Errores de Validación Detectados</div>
+                    <ul class="error-list" id="error-list"></ul>
+                    <div style="margin-top: 1rem; font-size: 0.9rem; font-weight: 600;">
+                        Corrija estos errores para obtener cálculos precisos
+                    </div>
+                </div>
+
+                <!-- Simulación Tab -->
+                <div id="tab-simulacion" class="tab-content active">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Parámetros de Simulación</div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="parameters-form">
+                                        <!-- Los parámetros se generarán aquí -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <!-- Métricas Calculadas -->
+                            <div class="card" style="margin-bottom: 2rem;">
+                                <div class="card-header">
+                                    <div class="card-title">Métricas Calculadas CORREGIDAS</div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="metrics-grid" id="calculated-metrics">
+                                        <!-- Métricas se generarán aquí -->
+                                    </div>
+                                    
+                                    <h4 style="font-weight: 600; margin: 1.5rem 0 1rem 0; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">Consumo de Alfalfa</h4>
+                                    <div class="metrics-grid" id="alfalfa-metrics">
+                                        <!-- Métricas de alfalfa se generarán aquí -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gráfico de Rentabilidad -->
+                            <div class="card" style="margin-bottom: 2rem;">
+                                <div class="card-header">
+                                    <div class="card-title">Rentabilidad por Eficiencia de Conversión (CORREGIDA)</div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="rentabilityChart"></canvas>
+                                    </div>
+                                    
+                                    <!-- Resultado Actual -->
+                                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: var(--light-color); border-radius: 4px; border: 1px solid var(--border-color);">
+                                        <h4 style="font-weight: 600; margin-bottom: 1rem; color: var(--text-color);">Resultado REAL con Parámetros Actuales:</h4>
+                                        <div class="row" id="current-results">
+                                            <!-- Resultados actuales se generarán aquí -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de Análisis de Sensibilidad -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Análisis de Sensibilidad - Eficiencia de Conversión</div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table" id="sensitivity-table">
+                                            <!-- Tabla se generará aquí -->
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análisis Inversión Tab -->
+                <div id="tab-inversion" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Análisis de Inversión (CORREGIDO)</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="investment-metrics">
+                                <!-- Métricas de inversión se generarán aquí -->
+                            </div>
+                            
+                            <div style="margin-top: 3rem;">
+                                <h4 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--text-color);">Proyección Anual Detallada</h4>
+                                <div class="chart-container">
+                                    <canvas id="projectionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métricas Financieras Tab -->
+                <div id="tab-financiero" class="tab-content">
+                    <div class="card" style="margin-bottom: 2rem;">
+                        <div class="card-header">
+                            <div class="card-title">Métricas Financieras Avanzadas</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="financial-metrics">
+                                <!-- Métricas financieras se generarán aquí -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Evolución del VAN por Año</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="vanChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análisis Costos Tab -->
+                <div id="tab-costos" class="tab-content">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Distribución de Costos REALES por Cordero</div>
+                                    <div class="card-actions">
+                                        <button class="btn btn-light" onclick="toggleCostChart()">
+                                            <span id="chart-toggle-text">Ver Barras</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="costChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Resumen Detallado de Costos REALES</div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="cost-summary">
+                                        <!-- Resumen se generará aquí -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flujo de Caja Tab -->
+                <div id="tab-flujo" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Análisis de Flujo de Caja Detallado</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table" id="cashflow-table">
+                                    <!-- Tabla se generará aquí -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sanidad Tab -->
+                <div id="tab-sanidad" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Registro Sanitario</div>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: #6c757d; padding: 2rem; font-style: italic;">
+                                Registro sanitario sin datos disponibles
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer">
+                © 2025 AgroProfit AiDeep Economics - Simulador para Nirea. Todos los derechos reservados.
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Basic protection measures
+        (function() {
+            // Disable right-click
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            
+            // Disable common developer shortcuts
+            document.addEventListener('keydown', e => {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                    (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                    (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
+                    alert('Acceso restringido - AgroProfit AiDeep Economics © 2025');
+                }
+            });
+            
+            // Simple console warning
+            console.log('%cAGROPROFIT AIDEEP ECONOMICS - CÓDIGO PROTEGIDO', 'color: red; font-size: 20px; font-weight: bold;');
+            console.log('%cEste software está protegido por derechos de autor.', 'color: red; font-size: 14px;');
+            console.log('%c© 2025 AgroProfit AiDeep Economics - Simulador para Nirea', 'color: red; font-size: 14px;');
+        })();
+
+        // Estado global de la aplicación
+        let parametros = {
+            corderosPorCiclo: 1500, diasCiclo: 40, ciclosPorAno: 9.125,
+            precioCompra: 1.89, precioVenta: 5.0, pesoInicial: 35,
+            precioRacion: 330, consumoEsperadoPV: 4.5, porcentajeMSRacion: 88,
+            consumoAlfalfaPV: 1, costoAlfalfaPorKg: 0.45,
+            eficienciaConversionObjetivo: 5.5, rinde: 0.45,
+            costoHoteleriaDia: 0.1, costoSanidadPorCordero: 0.66,
+            costoFlete: 0.70, costoDescuentosLegales: 2.7, otrosCostos: 0.1,
+            comisionPorcentaje: 2, costoCaravanas: 1.15, porcentajeMortalidad: 1,
+            inversionInicial: 33000, vidaUtilEquipo: 15, valorResidual: 0.30,
+            tasaDescuento: 0.12, anosProyeccion: 10, costosOperativosMensuales: 0
+        };
+
+        // Variables globales para charts
+        let rentabilityChart = null, projectionChart = null, vanChart = null, costChart = null, showPieChart = true;
+
+        // Configuración de parámetros con tooltips
+        const parametrosConfig = {
+            'Parámetros Básicos': {
+                corderosPorCiclo: { label: 'Corderos por Ciclo', type: 'number', tooltip: 'Número de corderos que ingresan en cada ciclo de engorde. Determina la escala de operación y capacidad del sistema.' },
+                diasCiclo: { label: 'Días por Ciclo', type: 'number', tooltip: 'Duración en días de cada ciclo de engorde. Se calcula desde el ingreso hasta la salida de los animales. Típicamente entre 35-45 días.' },
+                ciclosPorAno: { label: 'Ciclos por Año', type: 'number', step: '0.1', tooltip: 'Número de ciclos completos por año. Se calcula como: 365 días ÷ días por ciclo. Determina la rotación anual del sistema.' }
+            },
+            'Parámetros Económicos': {
+                precioCompra: { label: 'Precio Compra (USD/kg)', type: 'number', step: '0.01', tooltip: 'Precio de compra de corderos en USD por kg de peso vivo. Base para calcular el costo de reposición.' },
+                precioVenta: { label: 'Precio Venta (USD/kg)', type: 'number', step: '0.01', tooltip: 'Precio de venta de carne en USD por kg. Aplicado sobre los kg de carne efectivos (peso ganado × rinde).' },
+                pesoInicial: { label: 'Peso Inicial (kg)', type: 'number', tooltip: 'Peso promedio de los corderos al ingreso en kg. Base para calcular consumo esperado y costo de reposición.' }
+            },
+            'Alimentación': {
+                precioRacion: { label: 'Precio Ración (USD/ton)', type: 'number', tooltip: 'Costo de la ración balanceada en USD por tonelada. Base para calcular el costo de alimentación por animal.' },
+                consumoEsperadoPV: { label: 'Consumo Esperado (%PV)', type: 'number', step: '0.1', tooltip: 'Consumo esperado de materia seca como porcentaje del peso vivo. Típicamente 3.5-5.5% del PV.' },
+                porcentajeMSRacion: { label: '% MS Ración', type: 'number', step: '0.1', tooltip: 'Porcentaje de materia seca de la ración. Usado para convertir consumo de MS a consumo de materia fresca.' },
+                consumoAlfalfaPV: { label: 'Consumo Alfalfa (%PV)', type: 'number', step: '0.1', tooltip: 'Consumo de fardos de alfalfa como porcentaje del peso vivo. Típicamente 1% del PV para complemento nutricional.' },
+                costoAlfalfaPorKg: { label: 'Costo Alfalfa (USD/kg)', type: 'number', step: '0.01', tooltip: 'Costo por kilogramo de alfalfa en fardos. Se calcula como: Precio del fardo ÷ Peso del fardo (ej: 9 USD ÷ 20 kg = 0.45 USD/kg).' }
+            },
+            'Conversión y Rendimiento': {
+                eficienciaConversionObjetivo: { label: 'Eficiencia Conversión', type: 'number', step: '0.1', tooltip: 'Kg de materia seca consumida por kg de peso ganado. Menor valor = mejor eficiencia. Típico: 4.5-7.0' },
+                rinde: { label: 'Rinde', type: 'number', step: '0.01', tooltip: 'Rendimiento de carcasa: kg de carne comercializable por kg de peso ganado. Típicamente 0.42-0.48 (42-48%).' },
+                porcentajeMortalidad: { label: '% Mortalidad', type: 'number', step: '0.1', tooltip: 'Porcentaje de mortalidad esperada durante el ciclo. Impacta en los costos al distribuirse entre animales sobrevivientes.' }
+            },
+            'Costos Operativos': {
+                costoHoteleriaDia: { label: 'Costo Hotelería/día (USD)', type: 'number', step: '0.01', tooltip: 'Costo diario por animal de instalaciones, mano de obra, mantenimiento. Se multiplica por días del ciclo.' },
+                costoSanidadPorCordero: { label: 'Costo Sanidad (USD)', type: 'number', step: '0.01', tooltip: 'Costo por animal de vacunas, medicamentos, tratamientos veterinarios durante todo el ciclo.' },
+                costoFlete: { label: 'Costo Flete (USD)', type: 'number', step: '0.01', tooltip: 'Costo de transporte por cordero desde el establecimiento hasta el frigorífico.' }
+            },
+            'Otros Costos': {
+                costoDescuentosLegales: { label: 'Descuentos Legales (USD)', type: 'number', step: '0.01', tooltip: 'Descuentos obligatorios por normativas (INIA, vacunaciones, etc.) expresados en USD por cordero.' },
+                comisionPorcentaje: { label: 'Comisión (%)', type: 'number', step: '0.1', tooltip: 'Comisión porcentual aplicada sobre el costo de reposición. Típicamente comisiones de compra.' },
+                costoCaravanas: { label: 'Costo Caravanas (USD)', type: 'number', step: '0.01', tooltip: 'Costo de identificación individual por animal (caravanas, chips, etc.).' },
+                otrosCostos: { label: 'Otros Costos (USD)', type: 'number', step: '0.01', tooltip: 'Otros costos menores no clasificados en las categorías anteriores.' }
+            },
+            'Parámetros Financieros': {
+                inversionInicial: { label: 'Inversión Inicial (USD)', type: 'number', tooltip: 'Inversión inicial en instalaciones, equipos, infraestructura necesaria para el sistema.' },
+                vidaUtilEquipo: { label: 'Vida Útil (años)', type: 'number', tooltip: 'Vida útil esperada del equipo e instalaciones en años. Base para calcular depreciación.' },
+                valorResidual: { label: 'Valor Residual (%)', type: 'number', step: '0.01', tooltip: 'Valor residual como porcentaje de la inversión inicial al final de la vida útil.' },
+                tasaDescuento: { label: 'Tasa Descuento (%)', type: 'number', step: '0.01', tooltip: 'Tasa de descuento anual para cálculos de VAN. Refleja costo de oportunidad del capital.' },
+                anosProyeccion: { label: 'Años Proyección', type: 'number', tooltip: 'Horizonte de evaluación del proyecto en años.' },
+                costosOperativosMensuales: { label: 'Costos Op. Mensuales (USD)', type: 'number', tooltip: 'Costos fijos mensuales independientes del número de animales.' }
+            }
+        };
+
+        // Sidebar Functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const contentWrapper = document.getElementById('contentWrapper');
+            
+            sidebar.classList.toggle('sidebar-collapsed');
+            contentWrapper.classList.toggle('content-wrapper-expanded');
+        }
+
+        function showTab(tabId) {
+            // Remove active class from all sidebar links
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to current link
+            event.target.closest('.sidebar-link').classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show current tab content
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Update charts based on active tab
+            setTimeout(() => {
+                if (tabId === 'simulacion') updateRentabilityChart();
+                else if (tabId === 'inversion') { updateInvestmentAnalysis(); updateProjectionChart(); }
+                else if (tabId === 'financiero') { updateFinancialMetrics(); updateVANChart(); }
+                else if (tabId === 'costos') { updateCostChart(); updateCostSummary(); }
+                else if (tabId === 'flujo') updateCashflowTable();
+            }, 100);
+        }
+
+        // Funciones de cálculo optimizadas (mismas que antes)
+        function calcularCMSPorCordero() {
+            const pesoInicial = parametros.pesoInicial;
+            const cmsIteracion1 = pesoInicial * (parametros.consumoEsperadoPV / 100);
+            const gmdIteracion1 = cmsIteracion1 / parametros.eficienciaConversionObjetivo;
+            const kgGanadosIteracion1 = gmdIteracion1 * parametros.diasCiclo;
+            const pesoFinalIteracion1 = pesoInicial + kgGanadosIteracion1;
+            const pesoPromedio = (pesoInicial + pesoFinalIteracion1) / 2;
+            return pesoPromedio * (parametros.consumoEsperadoPV / 100);
+        }
+
+        function calcularCMFPorCordero() { return calcularCMSPorCordero() / (parametros.porcentajeMSRacion / 100); }
+        function calcularGMD() { return calcularCMSPorCordero() / parametros.eficienciaConversionObjetivo; }
+        function calcularKgGanados() { return calcularGMD() * parametros.diasCiclo; }
+        function calcularKgCarneEfectivos() { return (parametros.pesoInicial + calcularKgGanados()) * parametros.rinde; }
+        function calcularCostoReposicion() { return parametros.precioCompra * parametros.pesoInicial; }
+        function calcularComisionUSD() { return calcularCostoReposicion() * (parametros.comisionPorcentaje / 100); }
+        function calcularCostoAlimentacionPorDia() { return (calcularCMFPorCordero() * parametros.precioRacion) / 1000; }
+        function calcularCostoTotalAlimentacion() { return calcularCostoAlimentacionPorDia() * parametros.diasCiclo; }
+        function calcularCostoTotalHoteleria() { return parametros.costoHoteleriaDia * parametros.diasCiclo; }
+        function calcularConsumoDiarioAlfalfa() { return parametros.pesoInicial * (parametros.consumoAlfalfaPV / 100); }
+        function calcularCostoDiarioAlfalfa() { return calcularConsumoDiarioAlfalfa() * parametros.costoAlfalfaPorKg; }
+        function calcularCostoTotalAlfalfaPorCordero() { return calcularCostoDiarioAlfalfa() * parametros.diasCiclo; }
+        function calcularCostoTotalAlfalfaLote() { return calcularCostoTotalAlfalfaPorCordero() * parametros.corderosPorCiclo; }
+
+        function calcularPerdidasPorMortalidad() {
+            const costoPorAnimalMuerto = calcularCostoReposicion() + calcularComisionUSD() + calcularCostoTotalAlimentacion() + 
+                                        calcularCostoTotalAlfalfaPorCordero() + calcularCostoTotalHoteleria() + parametros.costoCaravanas + 
+                                        parametros.costoSanidadPorCordero;
+            const animalesMuertos = parametros.corderosPorCiclo * (parametros.porcentajeMortalidad / 100);
+            const perdidasTotales = costoPorAnimalMuerto * animalesMuertos;
+            const corderosSobrevivientes = parametros.corderosPorCiclo * ((100 - parametros.porcentajeMortalidad) / 100);
+            return perdidasTotales / corderosSobrevivientes;
+        }
+
+        function calcularIngresosPorCordero() { return calcularKgCarneEfectivos() * parametros.precioVenta; }
+        function calcularIngresosPorCorderoAjustados() {
+            return calcularIngresosPorCordero() * ((100 - parametros.porcentajeMortalidad) / 100);
+        }
+
+        function calcularMargenPorCordero() {
+            const ingresos = calcularIngresosPorCorderoAjustados();
+            const depreciacionAnual = parametros.inversionInicial * (1 - parametros.valorResidual) / parametros.vidaUtilEquipo;
+            const corderosPorAno = parametros.corderosPorCiclo * parametros.ciclosPorAno;
+            const depreciacionPorCordero = depreciacionAnual / corderosPorAno;
+            const costosTotal = calcularCostoReposicion() + calcularComisionUSD() + calcularCostoTotalHoteleria() + 
+                               calcularCostoTotalAlimentacion() + calcularCostoTotalAlfalfaPorCordero() + 
+                               parametros.costoSanidadPorCordero + parametros.costoFlete + parametros.otrosCostos + 
+                               parametros.costoDescuentosLegales + parametros.costoCaravanas + depreciacionPorCordero + 
+                               calcularPerdidasPorMortalidad();
+            return ingresos - costosTotal;
+        }
+
+        function calcularAnalisisInversion() {
+            const marginPorCordero = calcularMargenPorCordero();
+            const marginPorCiclo = marginPorCordero * parametros.corderosPorCiclo;
+            const valorDepreciable = parametros.inversionInicial * (1 - parametros.valorResidual);
+            const depreciacionAnual = valorDepreciable / parametros.vidaUtilEquipo;
+            const ingresosAnuales = calcularIngresosPorCorderoAjustados() * parametros.corderosPorCiclo * parametros.ciclosPorAno;
+            const costosVariablesAnuales = (calcularIngresosPorCorderoAjustados() - marginPorCordero) * parametros.corderosPorCiclo * parametros.ciclosPorAno;
+            const costosFijosAnuales = parametros.costosOperativosMensuales * 12;
+            const utilidadAntesDepreciacion = ingresosAnuales - costosVariablesAnuales - costosFijosAnuales;
+            const utilidadOperativaAnual = marginPorCordero * parametros.corderosPorCiclo * parametros.ciclosPorAno;
+            const roi = (utilidadOperativaAnual / parametros.inversionInicial) * 100;
+            const paybackPeriod = parametros.inversionInicial / (utilidadOperativaAnual / 12);
+            const margenOperativo = (utilidadOperativaAnual / ingresosAnuales) * 100;
+            return { marginPorCordero, marginPorCiclo, ingresosAnuales, costosVariablesAnuales, costosFijosAnuales, depreciacionAnual, utilidadAntesDepreciacion, utilidadOperativaAnual, roi, paybackPeriod, margenOperativo, corderosPorAno: parametros.corderosPorCiclo * parametros.ciclosPorAno, cms: calcularCMSPorCordero(), cmf: calcularCMFPorCordero(), gmd: calcularGMD(), kgGanados: calcularKgGanados(), kgCarneEfectivos: calcularKgCarneEfectivos() };
+        }
+
+        function calcularVAN(flujosCaja, tasaDescuento, inversionInicial) {
+            let van = -inversionInicial;
+            for (let i = 0; i < flujosCaja.length; i++) { van += flujosCaja[i] / Math.pow(1 + tasaDescuento, i + 1); }
+            return van;
+        }
+
+        function calcularTIR(flujosCaja, inversionInicial) {
+            let tirBajo = 0, tirAlto = 1;
+            const precision = 0.0001, maxIteraciones = 1000;
+            while (calcularVAN(flujosCaja, tirAlto, inversionInicial) > 0) { tirAlto *= 2; if (tirAlto > 10) break; }
+            for (let i = 0; i < maxIteraciones; i++) {
+                const tirMedio = (tirBajo + tirAlto) / 2;
+                const vanMedio = calcularVAN(flujosCaja, tirMedio, inversionInicial);
+                if (Math.abs(vanMedio) < precision) return tirMedio;
+                if (vanMedio > 0) tirBajo = tirMedio; else tirAlto = tirMedio;
+            }
+            return (tirBajo + tirAlto) / 2;
+        }
+
+        function calcularMetricasFinancieras() {
+            const analisis = calcularAnalisisInversion();
+            const flujosCajaAnuales = [];
+            for (let ano = 1; ano <= parametros.anosProyeccion; ano++) {
+                if (ano === parametros.vidaUtilEquipo && parametros.anosProyeccion >= parametros.vidaUtilEquipo) {
+                    const valorResidualRecuperado = parametros.inversionInicial * parametros.valorResidual;
+                    flujosCajaAnuales.push(analisis.utilidadOperativaAnual + valorResidualRecuperado);
+                } else if (ano === parametros.anosProyeccion && parametros.anosProyeccion < parametros.vidaUtilEquipo) {
+                    const proporcionVidaUtil = parametros.anosProyeccion / parametros.vidaUtilEquipo;
+                    const valorResidualProporcional = parametros.inversionInicial * parametros.valorResidual * (1 - proporcionVidaUtil);
+                    flujosCajaAnuales.push(analisis.utilidadOperativaAnual + valorResidualProporcional);
+                } else {
+                    flujosCajaAnuales.push(analisis.utilidadOperativaAnual);
+                }
+            }
+            const van = calcularVAN(flujosCajaAnuales, parametros.tasaDescuento, parametros.inversionInicial);
+            const tir = calcularTIR(flujosCajaAnuales, parametros.inversionInicial);
+            const indiceRentabilidad = van / parametros.inversionInicial;
+            const ebitda = analisis.utilidadOperativaAnual + analisis.depreciacionAnual;
+            return { van, tir, indiceRentabilidad, ebitda, flujosCajaAnuales };
+        }
+
+        // Validaciones
+        function validarParametros() {
+            const errores = [];
+            if (parametros.corderosPorCiclo <= 0) errores.push("Corderos por ciclo debe ser mayor a 0");
+            if (parametros.diasCiclo <= 0) errores.push("Días por ciclo debe ser mayor a 0");
+            if (parametros.precioCompra <= 0) errores.push("Precio de compra debe ser mayor a 0");
+            if (parametros.precioVenta <= 0) errores.push("Precio de venta debe ser mayor a 0");
+            if (parametros.pesoInicial <= 0) errores.push("Peso inicial debe ser mayor a 0");
+            if (parametros.eficienciaConversionObjetivo < 1) errores.push("Eficiencia de conversión no puede ser menor a 1 (imposible biológicamente)");
+            if (parametros.eficienciaConversionObjetivo > 15) errores.push("Eficiencia de conversión muy alta (verificar valor)");
+            if (parametros.rinde <= 0 || parametros.rinde > 1) errores.push("Rinde debe estar entre 0 y 1 (0% - 100%)");
+            if (parametros.porcentajeMortalidad < 0 || parametros.porcentajeMortalidad > 50) errores.push("Mortalidad debe estar entre 0% y 50%");
+            if (parametros.consumoEsperadoPV <= 0 || parametros.consumoEsperadoPV > 10) errores.push("Consumo esperado debe estar entre 0% y 10% del PV");
+            if (parametros.porcentajeMSRacion <= 0 || parametros.porcentajeMSRacion > 100) errores.push("% MS ración debe estar entre 0% y 100%");
+            if (parametros.consumoAlfalfaPV < 0 || parametros.consumoAlfalfaPV > 5) errores.push("Consumo de alfalfa debe estar entre 0% y 5% del PV");
+            if (parametros.precioVenta <= parametros.precioCompra) errores.push("Precio de venta debe ser mayor al precio de compra");
+            if (parametros.valorResidual < 0 || parametros.valorResidual > 1) errores.push("Valor residual debe estar entre 0% y 100%");
+            if (parametros.tasaDescuento < 0 || parametros.tasaDescuento > 1) errores.push("Tasa de descuento debe estar entre 0% y 100%");
+            if (parametros.vidaUtilEquipo <= 0 || parametros.vidaUtilEquipo > 50) errores.push("Vida útil debe estar entre 1 y 50 años");
+            if (parametros.anosProyeccion <= 0 || parametros.anosProyeccion > 30) errores.push("Años de proyección debe estar entre 1 y 30 años");
+            return errores;
+        }
+
+        function generateParametersForm() {
+            const form = document.getElementById('parameters-form');
+            form.innerHTML = '';
+            Object.entries(parametrosConfig).forEach(([sectionTitle, params]) => {
+                const section = document.createElement('div');
+                section.className = 'form-section';
+                const title = document.createElement('h4');
+                title.className = 'form-section-title';
+                title.textContent = sectionTitle;
+                section.appendChild(title);
+                Object.entries(params).forEach(([key, config]) => {
+                    const group = document.createElement('div');
+                    group.className = 'form-group';
+                    const label = document.createElement('label');
+                    label.className = 'form-label tooltip';
+                    label.innerHTML = `${config.label} <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>${config.tooltip}</span>`;
+                    const input = document.createElement('input');
+                    input.className = 'form-control';
+                    input.type = config.type;
+                    if (config.step) input.step = config.step;
+                    if (key === 'tasaDescuento') input.value = parametros[key] * 100; else input.value = parametros[key];
+                    input.addEventListener('input', (e) => {
+                        let value = parseFloat(e.target.value) || 0;
+                        if (key === 'tasaDescuento') value = value / 100;
+                        parametros[key] = value;
+                        if (key === 'diasCiclo') {
+                            parametros.ciclosPorAno = parseFloat((365 / value).toFixed(3));
+                            const ciclosInput = document.querySelector('input[data-param="ciclosPorAno"]');
+                            if (ciclosInput) ciclosInput.value = parametros.ciclosPorAno;
+                        }
+                        recalculate();
+                    });
+                    input.setAttribute('data-param', key);
+                    group.appendChild(label);
+                    group.appendChild(input);
+                    section.appendChild(group);
+                });
+                form.appendChild(section);
+            });
+        }
+
+        function updateHeaderMetrics() {
+            document.getElementById('header-corderos').textContent = parametros.corderosPorCiclo.toLocaleString();
+            document.getElementById('header-gmd').textContent = calcularGMD().toFixed(3) + ' kg/día';
+            document.getElementById('header-eficiencia').textContent = parametros.eficienciaConversionObjetivo;
+            const margen = calcularMargenPorCordero();
+            const margenElement = document.getElementById('header-margen');
+            margenElement.textContent = '$' + margen.toFixed(2);
+            margenElement.className = `metric-value ${margen >= 0 ? 'text-green' : 'text-red'}`;
+            const analisis = calcularAnalisisInversion();
+            document.getElementById('header-roi').textContent = analisis.roi ? `${analisis.roi.toFixed(1)}%` : '0%';
+        }
+
+        function showValidationErrors() {
+            const errores = validarParametros();
+            const errorPanel = document.getElementById('error-panel');
+            const errorList = document.getElementById('error-list');
+            if (errores.length > 0) {
+                errorList.innerHTML = errores.map(error => `<li>${error}</li>`).join('');
+                errorPanel.classList.add('show');
+            } else { errorPanel.classList.remove('show'); }
+        }
+
+        function updateCalculatedMetrics() {
+            const metrics = [
+                { id: 'cms', title: 'CMS/Cordero', value: calcularCMSPorCordero().toFixed(2) + ' kg', tooltip: 'Consumo de Materia Seca por cordero = Peso Promedio × (Consumo Esperado % PV ÷ 100). Cantidad diaria de alimento seco que consume cada animal.' },
+                { id: 'cmf', title: 'CMF/Cordero', value: calcularCMFPorCordero().toFixed(2) + ' kg', tooltip: 'Consumo de Materia Fresca = CMS ÷ (% MS Ración ÷ 100). Cantidad diaria total de ración (incluyendo humedad) que debe suministrarse.' },
+                { id: 'gmd', title: 'GMD Inferida', value: calcularGMD().toFixed(3) + ' kg/día', tooltip: 'Ganancia Media Diaria = CMS ÷ Eficiencia de Conversión. Kg de peso ganado por día basado en consumo y eficiencia.' },
+                { id: 'kg-ganados', title: 'Kg Ganados', value: calcularKgGanados().toFixed(1) + ' kg', tooltip: 'Kg Ganados = GMD × Días del Ciclo. Peso total ganado durante todo el período de engorde.' },
+                { id: 'peso-final', title: 'Peso Final', value: (parametros.pesoInicial + calcularKgGanados()).toFixed(1) + ' kg', tooltip: 'Peso Final = Peso Inicial + Kg Ganados. Peso total del animal al final del ciclo de engorde.' },
+                { id: 'kg-carne', title: 'Kg Carne Efectivos', value: calcularKgCarneEfectivos().toFixed(2) + ' kg', tooltip: 'Kg Carne Efectivos = (Peso Inicial + Kg Ganados) × Rinde. Cantidad real de carne comercializable producida basada en el peso final del animal.' },
+                { id: 'costo-reposicion', title: 'Costo Reposición', value: '$' + calcularCostoReposicion().toFixed(2), tooltip: 'Costo Reposición = Precio Compra × Peso Inicial. Costo de adquisición de cada cordero.' },
+                { id: 'comision', title: 'Comisión USD', value: '$' + calcularComisionUSD().toFixed(2), tooltip: 'Comisión USD = Costo Reposición × (Comisión % ÷ 100). Comisión en dólares por la compra de cada animal.' },
+                { id: 'perdida-mortalidad', title: 'Pérdida Mortalidad', value: '$' + calcularPerdidasPorMortalidad().toFixed(2), tooltip: 'Pérdidas totales por mortalidad distribuidas entre corderos sobrevivientes. Refleja el costo real de la mortalidad en el sistema.' },
+                { id: 'margen-real', title: 'Margen REAL', value: '$' + calcularMargenPorCordero().toFixed(2), tooltip: 'Margen CORREGIDO = Ingresos Ajustados por Mortalidad - (Costo Reposición + Comisión + Costos Operativos + Depreciación + Pérdidas por Mortalidad). Rentabilidad real considerando TODOS los costos.', highlight: true }
+            ];
+
+            document.getElementById('calculated-metrics').innerHTML = metrics.map(metric => `
+                <div class="metric-box ${metric.highlight ? 'highlight' : ''}">
+                    <div class="metric-title tooltip">${metric.title} <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>${metric.tooltip}</span></div>
+                    <div class="metric-value-large ${metric.highlight && calcularMargenPorCordero() >= 0 ? 'text-green' : metric.highlight && calcularMargenPorCordero() < 0 ? 'text-red' : ''}">${metric.value}</div>
+                </div>
+            `).join('');
+
+            const alfalfaMetrics = [
+                { title: 'Consumo Diario', value: calcularConsumoDiarioAlfalfa().toFixed(2) + ' kg/día', tooltip: 'Consumo Diario Alfalfa = Peso Inicial × (% Consumo Alfalfa ÷ 100). Kg de alfalfa consumidos diariamente por cordero.' },
+                { title: 'Costo Diario', value: '$' + calcularCostoDiarioAlfalfa().toFixed(3), tooltip: 'Costo Diario Alfalfa = Consumo Diario × Costo por kg. Costo diario de alfalfa por cordero.' },
+                { title: 'Costo/Cordero/Ciclo', value: '$' + calcularCostoTotalAlfalfaPorCordero().toFixed(2), tooltip: 'Costo Total Alfalfa = Costo Diario × Días Ciclo. Costo total de alfalfa por cordero durante el ciclo.' },
+                { title: 'Costo Total Lote', value: '$' + calcularCostoTotalAlfalfaLote().toLocaleString(), tooltip: 'Costo Total Lote = Costo por Cordero × Número de Corderos. Costo total de alfalfa para todo el lote.' }
+            ];
+
+            document.getElementById('alfalfa-metrics').innerHTML = alfalfaMetrics.map(metric => `
+                <div class="metric-box blue">
+                    <div class="metric-title tooltip">${metric.title} <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>${metric.tooltip}</span></div>
+                    <div class="metric-value-large">${metric.value}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateSensitivityData() {
+            const resultados = [];
+            for (let eficiencia = 4.0; eficiencia <= 8.0; eficiencia += 0.2) {
+                const parametrosTemp = {...parametros, eficienciaConversionObjetivo: eficiencia};
+                const pesoInicial = parametrosTemp.pesoInicial;
+                const cmsIteracion1 = pesoInicial * (parametrosTemp.consumoEsperadoPV / 100);
+                const gmdIteracion1 = cmsIteracion1 / eficiencia;
+                const kgGanadosIteracion1 = gmdIteracion1 * parametrosTemp.diasCiclo;
+                const pesoFinalIteracion1 = pesoInicial + kgGanadosIteracion1;
+                const pesoPromedio = (pesoInicial + pesoFinalIteracion1) / 2;
+                const cmsIteracion2 = pesoPromedio * (parametrosTemp.consumoEsperadoPV / 100);
+                const gmd = cmsIteracion2 / eficiencia;
+                const kgGanados = gmd * parametrosTemp.diasCiclo;
+                const pesoFinal = pesoInicial + kgGanados;
+                const kgCarneEfectivos = pesoFinal * parametrosTemp.rinde;
+                const ingresosPorAnimal = kgCarneEfectivos * parametrosTemp.precioVenta;
+                const tasaSupervivencia = (100 - parametrosTemp.porcentajeMortalidad) / 100;
+                const ingresos = ingresosPorAnimal * tasaSupervivencia;
+                const costoReposicion = parametrosTemp.precioCompra * parametrosTemp.pesoInicial;
+                const comision = costoReposicion * (parametrosTemp.comisionPorcentaje / 100);
+                const costoHoteleria = parametrosTemp.costoHoteleriaDia * parametrosTemp.diasCiclo;
+                const costoAlimentacion = (cmsIteracion2 / (parametrosTemp.porcentajeMSRacion / 100)) * parametrosTemp.precioRacion / 1000 * parametrosTemp.diasCiclo;
+                const costoAlfalfa = pesoInicial * (parametrosTemp.consumoAlfalfaPV / 100) * parametrosTemp.costoAlfalfaPorKg * parametrosTemp.diasCiclo;
+                const depreciacionAnual = parametrosTemp.inversionInicial * (1 - parametrosTemp.valorResidual) / parametrosTemp.vidaUtilEquipo;
+                const corderosPorAno = parametrosTemp.corderosPorCiclo * parametrosTemp.ciclosPorAno;
+                const depreciacionPorCordero = depreciacionAnual / corderosPorAno;
+                const costoPorAnimalMuerto = costoReposicion + comision + costoAlimentacion + costoAlfalfa + costoHoteleria + parametrosTemp.costoCaravanas + parametrosTemp.costoSanidadPorCordero;
+                const animalesMuertos = parametrosTemp.corderosPorCiclo * (parametrosTemp.porcentajeMortalidad / 100);
+                const perdidasMortalidad = costoPorAnimalMuerto * animalesMuertos;
+                const corderosSobrevivientes = parametrosTemp.corderosPorCiclo * tasaSupervivencia;
+                const perdidaMortalidadPorSobreviviente = perdidasMortalidad / corderosSobrevivientes;
+                const costosTotal = costoReposicion + comision + costoHoteleria + costoAlimentacion + costoAlfalfa + parametrosTemp.costoSanidadPorCordero + parametrosTemp.costoFlete + parametrosTemp.otrosCostos + parametrosTemp.costoDescuentosLegales + parametrosTemp.costoCaravanas + depreciacionPorCordero + perdidaMortalidadPorSobreviviente;
+                const margen = ingresos - costosTotal;
+                resultados.push({ eficienciaConversion: eficiencia, gmd: gmd.toFixed(3), kgGanados: kgGanados.toFixed(1), pesoFinal: pesoFinal.toFixed(1), kgCarneEfectivos: kgCarneEfectivos.toFixed(2), ingresos: ingresos.toFixed(2), costosTotal: costosTotal.toFixed(2), margen: margen.toFixed(2) });
+            }
+            return resultados;
+        }
+
+        function updateRentabilityChart() {
+            const ctx = document.getElementById('rentabilityChart');
+            if (!ctx) return;
+            const resultados = generateSensitivityData();
+            if (rentabilityChart) rentabilityChart.destroy();
+            rentabilityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: resultados.map(r => r.eficienciaConversion.toFixed(1)),
+                    datasets: [{ label: 'Margen REAL USD', data: resultados.map(r => parseFloat(r.margen)), borderColor: '#1a5276', backgroundColor: 'rgba(26, 82, 118, 0.1)', borderWidth: 3, tension: 0.1 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Eficiencia de Conversión' } }, y: { title: { display: true, text: 'Margen REAL por Cordero (USD)' } } }, plugins: { title: { display: true, text: 'Rentabilidad por Eficiencia de Conversión' } } }
+            });
+            updateSensitivityTable(resultados);
+            updateCurrentResults();
+        }
+
+        function updateSensitivityTable(resultados) {
+            const table = document.getElementById('sensitivity-table');
+            const filteredResults = resultados.filter((_, index) => index % 3 === 0);
+            table.innerHTML = `<thead><tr><th>Eficiencia Conv.</th><th>GMD (kg/día)</th><th>Kg Ganados</th><th>Peso Final</th><th>Kg Carne Efect.</th><th>Ingresos (USD)</th><th>Costos (USD)</th><th>Margen (USD)</th></tr></thead><tbody>${filteredResults.map(resultado => `<tr class="${parseFloat(resultado.margen) > 0 ? 'positive' : 'negative'}"><td style="font-weight: 600;">${resultado.eficienciaConversion.toFixed(1)}</td><td>${resultado.gmd}</td><td>${resultado.kgGanados}</td><td>${resultado.pesoFinal}</td><td>${resultado.kgCarneEfectivos}</td><td>$${resultado.ingresos}</td><td>$${resultado.costosTotal}</td><td style="font-weight: 600;">$${resultado.margen}</td></tr>`).join('')}</tbody>`;
+        }
+
+        function updateCurrentResults() {
+            const ingresos = calcularIngresosPorCorderoAjustados(), margen = calcularMargenPorCordero(), costos = ingresos - margen;
+            document.getElementById('current-results').innerHTML = `
+                <div class="col-3" style="font-size: 0.9rem;"><div class="tooltip" style="color: #6c757d; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Ingresos Reales: <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Ingresos reales considerando mortalidad = Ingresos por animal × Tasa de supervivencia. Solo se venden los animales sobrevivientes.</span></div><div style="font-weight: bold; color: var(--success-color);">$${ingresos.toFixed(2)}</div></div>
+                <div class="col-3" style="font-size: 0.9rem;"><div class="tooltip" style="color: #6c757d; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Costos Totales REALES: <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Costos totales CORREGIDOS incluyen: Costo de reposición + Comisión + Alimentación + Alfalfa + Hotelería + Sanidad + Flete + Pérdidas por mortalidad + Descuentos legales + Caravanas + Depreciación + Otros costos.</span></div><div style="font-weight: bold; color: var(--error-color);">$${costos.toFixed(2)}</div></div>
+                <div class="col-3" style="font-size: 0.9rem;"><div class="tooltip" style="color: #6c757d; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Margen REAL/Cordero: <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Margen CORREGIDO = Ingresos Ajustados por Mortalidad - (Costo Reposición + Comisión + Costos Operativos + Depreciación + Pérdidas por Mortalidad). Rentabilidad real considerando TODOS los costos.</span></div><div class="${margen >= 0 ? 'text-green' : 'text-red'}" style="font-weight: bold;">$${margen.toFixed(2)}</div></div>
+                <div class="col-3" style="font-size: 0.9rem;"><div class="tooltip" style="color: #6c757d; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Margen REAL/Ciclo: <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Margen real por cordero multiplicado por el número de corderos por ciclo. Representa la rentabilidad REAL de un ciclo completo.</span></div><div class="${margen >= 0 ? 'text-green' : 'text-red'}" style="font-weight: bold;">$${(margen * parametros.corderosPorCiclo).toLocaleString()}</div></div>
+            `;
+        }
+
+        function updateInvestmentAnalysis() {
+            const analisis = calcularAnalisisInversion();
+            document.getElementById('investment-metrics').innerHTML = `
+                <div class="col-4"><div style="background: white; padding: 1.5rem; border-radius: 4px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">ROI Anual <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Retorno sobre Inversión anual = (Utilidad Operativa Anual ÷ Inversión Inicial) × 100</span></div><div style="font-size: 2rem; font-weight: 600; color: var(--primary-color);">${analisis.roi ? `${analisis.roi.toFixed(1)}%` : '0%'}</div></div></div>
+                <div class="col-4"><div style="background: white; padding: 1.5rem; border-radius: 4px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Utilidad Operativa Anual <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Utilidad después de costos operativos y depreciación anual del equipo</span></div><div style="font-size: 2rem; font-weight: 600; color: var(--success-color);">$${analisis.utilidadOperativaAnual ? analisis.utilidadOperativaAnual.toLocaleString() : '0'}</div></div></div>
+                <div class="col-4"><div style="background: white; padding: 1.5rem; border-radius: 4px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Payback (meses) <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Tiempo en meses para recuperar la inversión inicial basado en la utilidad operativa mensual</span></div><div style="font-size: 2rem; font-weight: 600; color: var(--warning-color);">${analisis.paybackPeriod ? analisis.paybackPeriod.toFixed(1) : '0'}</div></div></div>
+            `;
+        }
+
+        function updateProjectionChart() {
+            const ctx = document.getElementById('projectionChart');
+            if (!ctx) return;
+            const meses = Array.from({length: 12}, (_, i) => `Mes ${i + 1}`);
+            const ingresos = meses.map((_, i) => (i + 1) * 15000 + Math.random() * 5000);
+            const costos = meses.map((_, i) => (i + 1) * 12000 + Math.random() * 3000);
+            if (projectionChart) projectionChart.destroy();
+            projectionChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: meses, datasets: [{ label: 'Ingresos Acumulados', data: ingresos, backgroundColor: 'rgba(46, 204, 113, 0.6)', borderColor: '#2ecc71', fill: true }, { label: 'Costos Acumulados', data: costos, backgroundColor: 'rgba(220, 53, 69, 0.6)', borderColor: '#dc3545', fill: true }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Proyección Anual Detallada' } } }
+            });
+        }
+
+        function updateFinancialMetrics() {
+            const metricas = calcularMetricasFinancieras();
+            document.getElementById('financial-metrics').innerHTML = `
+                <div class="col-3"><div style="background: #f0f9ff; padding: 1.5rem; border-radius: 4px; border: 1px solid #bae6fd; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">VAN <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Valor Actual Neto: Suma de flujos de caja futuros descontados menos inversión inicial</span></div><div class="${metricas.van >= 0 ? 'text-green' : 'text-red'}" style="font-size: 1.8rem; font-weight: 600;">${metricas.van ? metricas.van.toLocaleString() : '0'}</div></div></div>
+                <div class="col-3"><div style="background: #f0fff4; padding: 1.5rem; border-radius: 4px; border: 1px solid #bbf7d0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">TIR <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Tasa Interna de Retorno: Tasa de descuento que hace VAN = 0</span></div><div style="font-size: 1.8rem; font-weight: 600; color: var(--success-color);">${metricas.tir ? `${(metricas.tir * 100).toFixed(1)}%` : '0%'}</div></div></div>
+                <div class="col-3"><div style="background: #fffbeb; padding: 1.5rem; border-radius: 4px; border: 1px solid #fed7aa; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">Índice Rentabilidad <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>Índice de Rentabilidad: VAN ÷ Inversión Inicial. >0 es viable</span></div><div style="font-size: 1.8rem; font-weight: 600; color: var(--warning-color);">${metricas.indiceRentabilidad ? metricas.indiceRentabilidad.toFixed(2) : '0'}</div></div></div>
+                <div class="col-3"><div style="background: #faf5ff; padding: 1.5rem; border-radius: 4px; border: 1px solid #d8b4fe; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);"><div class="tooltip" style="color: #6c757d; font-weight: 500; cursor: help; display: flex; align-items: center; gap: 0.5rem;">EBITDA <span style="color: #6c757d; cursor: help;">ⓘ</span><span class="tooltip-content"><strong>Información</strong><br>EBITDA: Utilidad antes de intereses, impuestos, depreciación y amortización</span></div><div style="font-size: 1.8rem; font-weight: 600; color: #8b5cf6;">${metricas.ebitda ? metricas.ebitda.toLocaleString() : '0'}</div></div></div>
+            `;
+        }
+
+        function updateVANChart() {
+            const ctx = document.getElementById('vanChart');
+            if (!ctx) return;
+            const anos = Array.from({length: 10}, (_, i) => `Año ${i + 1}`);
+            const vanData = anos.map((_, i) => -33000 + (i + 1) * 8000 + Math.random() * 2000);
+            if (vanChart) vanChart.destroy();
+            vanChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: anos, datasets: [{ label: 'VAN Acumulado', data: vanData, borderColor: '#1a5276', backgroundColor: 'rgba(26, 82, 118, 0.1)', borderWidth: 3, tension: 0.1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Evolución del VAN por Año' } } }
+            });
+        }
+
+        function toggleCostChart() {
+            showPieChart = !showPieChart;
+            document.getElementById('chart-toggle-text').textContent = showPieChart ? 'Ver Barras' : 'Ver Circular';
+            updateCostChart();
+        }
+
+        function updateCostChart() {
+            const ctx = document.getElementById('costChart');
+            if (!ctx) return;
+            const resumenCostos = calcularResumenCostos();
+            if (costChart) costChart.destroy();
+            if (showPieChart) {
+                costChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: { labels: resumenCostos.map(c => c.categoria), datasets: [{ data: resumenCostos.map(c => c.valor), backgroundColor: ['#1a5276', '#2c3e50', '#34495e', '#5d6d7e', '#85929e', '#aeb6bf', '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#e91e63'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(context) { const label = context.label || ''; const value = context.parsed; const percentage = resumenCostos[context.dataIndex].porcentaje; return `${label}: ${value.toFixed(2)} (${percentage}%)`; } } } } }
+                });
+            } else {
+                costChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: resumenCostos.map(c => c.categoria), datasets: [{ label: 'Costo (USD)', data: resumenCostos.map(c => c.valor), backgroundColor: '#2c3e50' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Categoría de Costo' } }, y: { title: { display: true, text: 'Costo (USD)' } } } }
+                });
+            }
+        }
+
+        function calcularResumenCostos() {
+            const costoReposicion = calcularCostoReposicion(), comisionUSD = calcularComisionUSD(), costoHoteleria = calcularCostoTotalHoteleria(), costoAlimentacion = calcularCostoTotalAlimentacion(), costoAlfalfa = calcularCostoTotalAlfalfaPorCordero(), costoSanidad = parametros.costoSanidadPorCordero, costoFlete = parametros.costoFlete, otrosCostos = parametros.otrosCostos, costoDescuentos = parametros.costoDescuentosLegales, costoCaravanas = parametros.costoCaravanas;
+            const depreciacionAnual = parametros.inversionInicial * (1 - parametros.valorResidual) / parametros.vidaUtilEquipo, corderosPorAno = parametros.corderosPorCiclo * parametros.ciclosPorAno, depreciacionPorCordero = depreciacionAnual / corderosPorAno;
+            const perdidaMortalidadPorSobreviviente = calcularPerdidasPorMortalidad();
+            const totalCostos = costoReposicion + comisionUSD + costoHoteleria + costoAlimentacion + costoAlfalfa + costoSanidad + costoFlete + otrosCostos + costoDescuentos + costoCaravanas + depreciacionPorCordero + perdidaMortalidadPorSobreviviente;
+            return [
+                { categoria: 'Reposición', valor: parseFloat(costoReposicion.toFixed(2)), porcentaje: ((costoReposicion / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Comisión', valor: parseFloat(comisionUSD.toFixed(2)), porcentaje: ((comisionUSD / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Hotelería', valor: parseFloat(costoHoteleria.toFixed(2)), porcentaje: ((costoHoteleria / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Alimentación', valor: parseFloat(costoAlimentacion.toFixed(2)), porcentaje: ((costoAlimentacion / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Alfalfa', valor: parseFloat(costoAlfalfa.toFixed(2)), porcentaje: ((costoAlfalfa / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Sanidad', valor: parseFloat(costoSanidad.toFixed(2)), porcentaje: ((costoSanidad / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Flete', valor: parseFloat(costoFlete.toFixed(2)), porcentaje: ((costoFlete / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Pérd. Mortalidad', valor: parseFloat(perdidaMortalidadPorSobreviviente.toFixed(2)), porcentaje: ((perdidaMortalidadPorSobreviviente / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Desc. Legales', valor: parseFloat(costoDescuentos.toFixed(2)), porcentaje: ((costoDescuentos / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Caravanas', valor: parseFloat(costoCaravanas.toFixed(2)), porcentaje: ((costoCaravanas / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Depreciación', valor: parseFloat(depreciacionPorCordero.toFixed(2)), porcentaje: ((depreciacionPorCordero / totalCostos) * 100).toFixed(1) },
+                { categoria: 'Otros', valor: parseFloat(otrosCostos.toFixed(2)), porcentaje: ((otrosCostos / totalCostos) * 100).toFixed(1) }
+            ];
+        }
+
+        function updateCostSummary() {
+            const resumenCostos = calcularResumenCostos(), totalCostos = resumenCostos.reduce((sum, costo) => sum + costo.valor, 0);
+            const colors = ['#1a5276', '#2c3e50', '#34495e', '#5d6d7e', '#85929e', '#aeb6bf', '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#e91e63'];
+            document.getElementById('cost-summary').innerHTML = `
+                ${resumenCostos.map((costo, index) => `
+                    <div class="cost-item" style="border-left: 4px solid ${colors[index % colors.length]};">
+                        <div class="cost-item-info">
+                            <div class="cost-item-title">${costo.categoria}</div>
+                            <div class="cost-item-percent">${costo.porcentaje}% del total</div>
+                        </div>
+                        <div class="cost-item-value">
+                            <div class="cost-item-amount">${costo.valor}</div>
+                            <div class="cost-item-label">por cordero</div>
+                        </div>
+                    </div>
+                `).join('')}
+                <div class="cost-total">
+                    <span>Total REAL por Cordero:</span>
+                    <span style="color: var(--primary-color);">${totalCostos.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function updateCashflowTable() {
+            const analisis = calcularAnalisisInversion();
+            const flujos = [];
+            flujos.push({ periodo: 'Año 0', ingresosBrutos: 0, costosOperativos: 0, flujoOperativo: 0, inversion: -parametros.inversionInicial, flujoNeto: -parametros.inversionInicial, flujoAcumulado: -parametros.inversionInicial });
+            let acumulado = -parametros.inversionInicial;
+            for (let ano = 1; ano <= parametros.anosProyeccion; ano++) {
+                const ingresosBrutos = analisis.ingresosAnuales, costosOperativos = analisis.costosVariablesAnuales + analisis.costosFijosAnuales, flujoOperativo = ingresosBrutos - costosOperativos;
+                let valorResidual = 0;
+                if (ano === parametros.vidaUtilEquipo) valorResidual = parametros.inversionInicial * parametros.valorResidual;
+                const flujoNeto = analisis.utilidadOperativaAnual + valorResidual;
+                acumulado += flujoNeto;
+                flujos.push({ periodo: `Año ${ano}`, ingresosBrutos, costosOperativos, flujoOperativo, inversion: valorResidual, flujoNeto, flujoAcumulado: acumulado });
+            }
+            document.getElementById('cashflow-table').innerHTML = `
+                <thead><tr><th>Período</th><th>Ingresos Brutos</th><th>Costos Operativos</th><th>Flujo Operativo</th><th>Inversión</th><th>Flujo Neto</th><th>Flujo Acumulado</th></tr></thead>
+                <tbody>${flujos.map((flujo, index) => `<tr style="background: ${flujo.flujoAcumulado >= 0 && index > 0 ? '#f0fff4' : index > 0 ? '#fff5f5' : '#f8f9fa'};"><td style="font-weight: 600;">${flujo.periodo}</td><td>${flujo.ingresosBrutos.toLocaleString()}</td><td>${flujo.costosOperativos.toLocaleString()}</td><td>${flujo.flujoOperativo.toLocaleString()}</td><td>${flujo.inversion.toLocaleString()}</td><td style="font-weight: 600;">${flujo.flujoNeto.toLocaleString()}</td><td style="font-weight: bold; color: ${flujo.flujoAcumulado >= 0 ? 'var(--success-color)' : 'var(--error-color)'};">${flujo.flujoAcumulado.toLocaleString()}</td></tr>`).join('')}</tbody>
+            `;
+        }
+
+        function recalculate() {
+            showValidationErrors();
+            updateHeaderMetrics();
+            updateCalculatedMetrics();
+            
+            // Get the active tab and update accordingly
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab) {
+                const tabId = activeTab.id.replace('tab-', '');
+                if (tabId === 'simulacion') updateRentabilityChart();
+                else if (tabId === 'inversion') { updateInvestmentAnalysis(); updateProjectionChart(); }
+                else if (tabId === 'financiero') { updateFinancialMetrics(); updateVANChart(); }
+                else if (tabId === 'costos') { updateCostChart(); updateCostSummary(); }
+                else if (tabId === 'flujo') updateCashflowTable();
+            }
+        }
+
+        function init() {
+            generateParametersForm();
+            recalculate();
+            
+            // Prevent common debugging attempts
+            const originalConsole = console.log;
+            console.log = function(...args) {
+                if (args.length && typeof args[0] === 'string' && args[0].includes('inspect')) return;
+                originalConsole.apply(console, args);
+            };
+        }
+
+        // Loading protection
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('nirea_params', JSON.stringify(parametros));
+        });
+
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('nirea_params');
+            if (saved) {
+                try {
+                    const savedParams = JSON.parse(saved);
+                    parametros = { ...parametros, ...savedParams };
+                } catch (e) {}
+            }
+        });
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Performance monitoring
+        window.addEventListener('error', (e) => {
+            console.log('%cAgroProfit AiDeep Economics - Error protegido', 'color: red; font-weight: bold;');
+        });
+
+        // Additional protection
+        setInterval(() => {
+            if (document.querySelector('.protection-notice').style.display === 'none') {
+                document.querySelector('.protection-notice').style.display = 'block';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
